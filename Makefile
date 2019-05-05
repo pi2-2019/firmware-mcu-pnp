@@ -12,7 +12,7 @@ CC = /opt/msp430/msp430-gcc-7.3.2.154_linux64/bin/msp430-elf-gcc
 CPPFLAGS = -I/opt/msp430/msp430-gcc-support-files/include -Iinclude
 
 DEBUG := -g
-OPTIMIZATION := -Os -fdata-sections -ffunction-sections -Wl,--gc-sections  \
+OPTIMIZATION := -O2 -fdata-sections -ffunction-sections -Wl,--gc-sections  \
 -Wl,--print-gc-sections
 WARNINGS := -Wall -Wextra -pedantic -D_FORTIFY_SOURCE=1 -Wformat-overflow=2 \
 -Wformat-security -Wformat-truncation=2
