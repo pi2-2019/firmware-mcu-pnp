@@ -11,32 +11,54 @@
 #include <msp430.h>
 
 /* Endstop inputs */
-#define SW0_P1 (BIT0)
-#define SW1_P1 (BIT3)
-#define SW2_P1 (BIT4)
-#define SW3_P1 (BIT5)
-#define SW4_P1 (BIT6)
-#define SW5_P1 (BIT7)
-#define ALLSW (SW0_P1 | SW1_P1 | SW2_P1 | SW3_P1 | SW4_P1 | SW5_P1)
+/** SW0 endstop input (P1.0) */
+#define SW0 (BIT0)
+/** SW1 endstop input (P1.3) */
+#define SW1 (BIT3)
+/** SW2 endstop input (P1.4) */
+#define SW2 (BIT4)
+/** SW3 endstop input (P1.5) */
+#define SW3 (BIT5)
+/** SW4 endstop input (P1.6) */
+#define SW4 (BIT6)
+/** SW5 endstop input (P1.7) */
+#define SW5 (BIT7)
+/** All endstop inputs (P1) */
+#define ALLSW (SW0 | SW1 | SW2 | SW3 | SW4 | SW5)
 
 /* UART */
-#define UCA0RX_P1 (BIT1)
-#define UCA0TX_P1 (BIT2)
-
-/* Timer A3 CCI0 */
-#define STEPS_P2 (BIT0)
+/** UCA0 RX pin (P1.1) */
+#define UCA0RX (BIT1)
+/** UCA0 TX pin (P1.2) */
+#define UCA0TX (BIT2)
 
 /* Outputs */
-#define DIR_P2 (BIT1)
+/** X axis steps output (P2.0) */
+#define STEPS_X (BIT0)
+/** Y axis steps output (P2.1) */
+#define STEPS_Y (BIT1)
+/** Z axis steps output (P2.2) */
+#define STEPS_Z (BIT2)
+/** Z rotation driver steps output (P2.3) */
+#define STEPS_RZ (BIT3)
+/** Solder driver steps output (P2.4) */
+#define STEPS_S (BIT4)
+/** Global motor direction (P2.5). */
+#define DIR (BIT5)
+/** Global driver enable (P2.6). Enables drivers when set to zero. */
+#define ENABLE (BIT6)
+/** Vacuum enable (P2.7). Enables vacuum when one, disables when zero. */
+#define VACUUM (BIT7)
+/** Select all steps outputs (P2). */
+#define ALLSTEPS (STEPS_X | STEPS_Y | STEPS_Z | STEPS_RZ | STEPS_S)
+/** Select all outputs (P2).*/
+#define ALLOUTS (ALLSTEPS | DIR | ENABLE | VACUUM)
+/** Select all outputs but the global #ENABLE (P2).*/
+#define CMNOUTS (ALLSTEPS | DIR | VACUUM)
 
-#define EN0_P2 (BIT2)
-#define EN1_P2 (BIT3)
-#define EN2_P2 (BIT4)
-#define EN3_P2 (BIT5)
-#define EN4_P2 (BIT6)
-#define ALLEN (EN0_P2 | EN1_P2 | EN2_P2 | EN3_P2 | EN4_P2)
-
-#define RX_STR_SIZE (32)
+/** Size in bytes (characters) for the received string */
+#define RX_STR_SIZE (64)
+/** Size in bytes (characters) for the transmitted string */
 #define TX_STR_SIZE (64)
 
 /*
@@ -66,7 +88,7 @@
  * With SMCLK at 8 MHz and output mode 4 (toggle) 
  * set PWM period as 85*125ns*2 = 21,25 us
  */
-#define MIN_PULSE_PERIOD_XDIR (85-1)
+#define MIN_PULSE_PERIOD_YDIR (85-1)
 
 /*
  * For the 9 kgf*cm motors in the X direction
@@ -80,7 +102,7 @@
  * With SMCLK at 8 MHz and output mode 4 (toggle) 
  * set PWM period as 7547*125ns*2 = 1,887 ms
  */
-#define MIN_PULSE_PERIOD_YDIR (7547-1)
+#define MIN_PULSE_PERIOD_XDIR (7547-1)
 
 /*
  * For the 4,2 kgf*cm motors in the Z direction

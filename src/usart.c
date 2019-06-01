@@ -70,7 +70,7 @@ void validate_str(void)
 		 * pulses. The interruption will stop the Timer when the number
 		 * of steps is reached.
 		 */
-		start_t1_a3_c0();
+		start_t1_a3_c0(PULSE_PERIOD_1RPM);
 	} else {
 		req_steps = 0;
 		send_string("\r\nBad setpoint\r\n");

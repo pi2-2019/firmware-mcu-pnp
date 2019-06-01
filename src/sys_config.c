@@ -16,14 +16,14 @@ void initial_setup(void)
 	DCOCTL = CALDCO_8MHZ;
 	
 	/* Set P1.1 as UCA0RX and P1.2 as UCA0TX */
-	P1SEL |= UCA0RX_P1;
-	P1SEL2 |= UCA0RX_P1;
-	P1SEL |= UCA0TX_P1;
-	P1SEL2 |= UCA0TX_P1;
+	P1SEL |= UCA0RX;
+	P1SEL2 |= UCA0RX;
+	P1SEL |= UCA0TX;
+	P1SEL2 |= UCA0TX;
 	
 	/*
-	 * P1.0, P1.3, P1.4, P1.5, P1.6, P1.7 are pull-up inputs for SW_0, SW_1,
-	 * SW_2, SW_3, SW_4 and SW_5
+	 * P1.0, P1.3, P1.4, P1.5, P1.6, P1.7 are pull-up inputs for SW0, SW1,
+	 * SW2, SW3, SW4 and SW5
 	 * High logic level means end stop triggered
 	 * Set rising edge interruption to watch end stop events
 	 * Clear interruption flag
@@ -35,19 +35,22 @@ void initial_setup(void)
 	P1IE |= ALLSW;
 	P1IFG = 0;
 	
-	/* Set P2.0 as Timer1_A3.TA0 output */
-	P2DIR |= STEPS_P2;
-	P2SEL |= STEPS_P2;
-	P2SEL2 &= ~STEPS_P2;
-	
 	/*
-	 * P2.1 is the direction output
-	 * P2.2, P2.3, P2.4, P2.5 and P2.6 are EN_0 (X0 and X1), EN_1 (Y),
-	 * EN_2 (Z), EN_3 (ZROT), EN_4 (SOLDER).
-	 * High logic level disables the drivers (ENABLE' pin)
+	 * Set the other pins as outputs
+	 * P2.0, P2.1, P2.2, P2.3 and P2.4 are the STEPS outputs and will be
+	 * initially set to zero.
+	 *
+	 * P2.5 is the global direction and will be set to zero.
+	 *
+	 * P2.6 is the global driver enable pin and will be set to one in order
+	 * to start the system with the drivers turned off (ENABLE' pin).
+	 *
+	 * P2.7 controls the vacuum pump and will be set initially as zero (no
+	 * vacuum).
 	 */
-	P2DIR |= DIR_P2;
-	P2OUT &= ~DIR_P2;
-	P2DIR |= ALLEN;
-	P2OUT |= ALLEN;
+	P2DIR |= ENABLE;
+	P2OUT |= ENABLE;
+	
+	P2DIR |= CMNOUTS;
+	P2OUT &= ~CMNOUTS;
 }

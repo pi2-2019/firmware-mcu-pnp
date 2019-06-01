@@ -67,6 +67,7 @@ void __attribute__ ((interrupt(TIMER1_A0_VECTOR))) Step_Toggle (void)
 	static unsigned int toggle_count;
 	
 	if (toggle_count < (2*req_steps)) {
+		P2OUT ^= ALLSTEPS;
 		toggle_count++;
 	} else {
 		req_steps = 0;
@@ -76,7 +77,6 @@ void __attribute__ ((interrupt(TIMER1_A0_VECTOR))) Step_Toggle (void)
 		/*
 		 * Stop Timer1 A3, finished counting
 		 * Stop pulses
-	 	 * Set output to low logic level
 		 */
 		stop_t1_a3_c0();
 	}	
