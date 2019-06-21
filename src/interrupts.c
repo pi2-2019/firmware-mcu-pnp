@@ -67,7 +67,7 @@ void __attribute__ ((interrupt(TIMER1_A0_VECTOR))) Step_Toggle (void)
 	static unsigned int toggle_count;
 	
 	if (toggle_count < (2*req_steps)) {
-		P2OUT ^= ALLSTEPS;
+		TOGGLE_STEPS_X;
 		toggle_count++;
 	} else {
 		req_steps = 0;
