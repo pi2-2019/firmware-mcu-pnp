@@ -31,12 +31,4 @@ void __attribute__ ((interrupt(USCIAB0RX_VECTOR))) received_data_ISR (void);
  */
 void __attribute__ ((interrupt(PORT1_VECTOR))) port1_ISR (void);
 
-/**
- * @brief Toggles the TA1 output port when the preset period has elapsed.
- * The TA1 channel 0 output is toggled the number of times specified in the
- * desired steps variable #req_steps.
- * @return Void.
- */
-void __attribute__ ((interrupt(TIMER1_A0_VECTOR))) step_toggle_ISR (void);
-
 #endif
