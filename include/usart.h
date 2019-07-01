@@ -20,6 +20,7 @@ void config_uart_usart0(void);
 
 /**
  * @brief Sends one byte through USCIAB0 using UART.
+ * @param[in] c: character to be sent.
  * @return Void.
  */
 void send_char(char c);
@@ -27,6 +28,7 @@ void send_char(char c);
 /**
  * @brief Sends one string though USCIAB0 using UART. It depends internally on
  * #send_char.
+ * @param[in] str: pointer to the string to be sent.
  * @return Void.
  */
 void send_string(char *str);
@@ -36,9 +38,24 @@ void send_string(char *str);
  *
  * The validation verifies wether #rx_data_raw is a valid C string and checks if
  * the issued steps are greater than zero and smaller then the maximum range of
- * one unsigned integer (16 bits in this MCU). 
+ * one unsigned integer (16 bits in this MCU).
  * @return Void.
  */
 void validate_str(void);
 
+/**
+ * @brief Parses numbers after a character in #rx_data_raw. Useful for parsing
+ * parameters to G or M codes.
+ *
+ * The function searches for one character in #rx_data_raw and if it is found,
+ * searches for a valid float number right after it. If the desired character is
+ * not found, if the number found would overflow or underflow a float or if no
+ * valid number is found after the character, return #dft_ret as an error.
+ * @param[in] c: character to be found in #rx_data_raw.
+ * @param[in] dft_ret: code to return on error.
+ * @return the number right after #c or #dft_ret if an error occurs.
+ */
+float parse_param(char c, float dft_ret);
+
+void print_float(float f);
 #endif
