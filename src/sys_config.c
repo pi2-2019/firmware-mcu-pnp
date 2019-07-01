@@ -1,5 +1,7 @@
 #include <msp430.h>
+#include <string.h>
 #include "sys_config.h"
+#include "sys_control.h"
 
 void initial_setup(void)
 {
@@ -61,4 +63,18 @@ void initial_setup(void)
 	
 	P2DIR |= VACUUM;
 	P2OUT &= ~VACUUM;
+	
+	/* Reset the TX and RX buffers */
+	memset(rx_data_raw, 0, RX_STR_SIZE);
+	memset(tx_data_raw, 0, TX_STR_SIZE);
+	
+	/* Initialise the control vars */
+	memset(&req_status, 0, sizeof(struct status));
+	memset(&curr_status, 0, sizeof(struct status));
+	
+	/* Leave vacuum on */
+	/* The valve is normally open */
+	req_status.vacuum = 1;
+	RESET_VACUUM;
+	curr_status.vacuum = 1;
 }

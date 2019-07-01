@@ -108,6 +108,9 @@
 #define RESET_DIR_S (P2OUT &= ~DIR_S)
 #define TOGGLE_DIR_S (P2OUT ^= DIR_S)
 
+#define CW (1)
+#define CCW (0)
+
 /* Helper macros for global enable output */
 #define SET_ENABLE (P1OUT |= ENABLE)
 #define RESET_ENABLE (P1OUT &= ~ENABLE)
@@ -118,7 +121,8 @@
 #define RESET_VACUUM (P2OUT &= ~VACUUM)
 #define TOGGLE_VACUUM (P2OUT ^= VACUUM)
 
-/*
+/**
+ * @brief 1 RPM speed for all motors
  * Motor rotation speed in pulses per second
  * According to the WS23-0240-20-4 stepper motor datasheet, the worse case
  * scenario for torque loss is -0,2 kgf*cm/RPM and the average between 0 and 700
@@ -133,7 +137,8 @@
  */
 #define PULSE_PERIOD_1RPM (37736-1)
 
-/*
+/**
+ * @brief Max RPM for Y axis
  * For the 24 kgf*cm motors in the Y direction
  * Simulation shows the minimum torque required is 9,4 kgf*cm.
  * In order to work at 12 kgf*cm the motors may run, considering the average
@@ -147,7 +152,8 @@
  */
 #define MIN_PULSE_PERIOD_YDIR (85-1)
 
-/*
+/**
+ * @brief Max RPM for X axis
  * For the 9 kgf*cm motors in the X direction
  * Simulation shows the minimum torque required is 7 kgf*cm.
  * In order to work at 8 kgf*cm the motors may run, considering the best case
@@ -161,7 +167,8 @@
  */
 #define MIN_PULSE_PERIOD_XDIR (1020-1)
 
-/*
+/**
+ * @brief Max RPM for Z axis
  * For the 4,2 kgf*cm motors in the Z direction
  * Simulation shows the minimum torque required is 2 kgf*cm.
  * In order to work at 2,5 kgf*cm the motors may run, considering the worse case
@@ -175,12 +182,73 @@
  */
 #define MIN_PULSE_PERIOD_ZDIR (4717-1)
 
-#define MIN_PULSE_PERIOD_SOLDER (37736-1)
-#define MIN_PULSE_PERIOD_ROT (37736-1)
+/**
+ * @brief Max RPM for solder extruder
+ * Same configurations as #MIN_PULSE_PERIOD_ZDIR
+ */
+#define MIN_PULSE_PERIOD_SOLDER (4717-1)
+
+/**
+ * @brief Max RPM for C axis
+ * Negligible load on the motor 0,6 kgf*cm motor. In order to work with
+ * 0,2 kgf*cm in the best case scenario there will be a loss of 0,4 kgf*cm.
+ *
+ * At 14 RPM:
+ * (1/32 step) 106*4 ~ 424 Hz (2,358 ms)
+ *
+ * With SMCLK at 8 MHz and output mode 4 (toggle) 
+ * set PWM period as 9434*125ns*2 = 1,179 ms
+ */
+#define MIN_PULSE_PERIOD_ROT (9434-1)
+
+/**
+ * @brief Max RPM for XYZ calibration routine
+ * 4 RPM (see #MIN_PULSE_PERIOD_ZDIR)
+ */
+#define MIN_PULSE_CALIB_XYZ (MIN_PULSE_PERIOD_ZDIR/2 - 1)
+
+/* Motors' steps per mm constants */
+
+/** @brief X axis steps per mm constant
+ * GT-2 belt provides 5 mm per motor rotation. The system is configured to run
+ * with 1/32 microstep, with 200 steps per rotation step motors, so:
+ * 5 mm = 32*200 steps = 6400 steps 
+ * 1 mm = 1280 steps
+ */
+#define STEPS_PER_MM_X (1280)
+/** @brief Y axis steps per mm constant
+ * GT-2 belt provides 14 mm per motor rotation. The system is configured to run
+ * with 1/32 microstep, with 200 steps per rotation step motors, so:
+ * 14 mm = 32*200 steps = 6400 steps 
+ * 1 mm = 3200/7 steps ~ 457 steps
+ */
+#define STEPS_PER_MM_Y (457)
+/** @brief Z axis steps per mm constant
+ * Fuse provides 1,5 mm per motor rotation. The system is configured to run
+ * with 1/32 microstep, with 200 steps per rotation step motors, so:
+ * 1,5 mm = 32*200 steps = 6400 steps 
+ * 1 mm ~ 4267 steps
+ */
+#define STEPS_PER_MM_Z (4267)
+/** @brief Solder extruder steps per mm constant
+ * Fuse provides 1,5 mm per motor rotation. The system is configured to run
+ * with 1/32 microstep, with 200 steps per rotation step motors, so:
+ * 1,5 mm = 32*200 steps = 6400 steps 
+ * 1 mm ~ 4267 steps
+ */
+#define STEPS_PER_MM_S (4267)
+/** @brief C axis (RZ) steps per mm constant
+ * Motor completes 360 degrees in 200 steps, but system uses 1/32 microsteps.
+ * 360° = 32*200 steps = 6400 steps 
+ * 1° = 160/9 steps ~ 18 steps
+ */
+#define STEPS_PER_DEG_RZ (18)
 
 /* Global vars */
 /** Buffer to store raw data received by the UART */
 char rx_data_raw[RX_STR_SIZE];
+/** Buffer to send data though UART */
+char tx_data_raw[TX_STR_SIZE];
 /** Variable to store the requires steps/usteps for the desired movement */
 unsigned long int req_steps;
 
