@@ -13,8 +13,10 @@
 /* Endstop inputs */
 /** X+,Y+,Z+ endstop inputs (P1.0) */
 #define SW0 (BIT0)
+
 /** X-,Y-,Z- endstop inputs (P1.3) */
 #define SW1 (BIT3)
+
 /** All endstop inputs (P1.0 and P1.3) */
 #define ALLSW (SW0 | SW1)
 
@@ -26,39 +28,43 @@
 
 /* Steps outputs */
 /** X axis steps output (P2.0) */
-#define STEPS_X (BIT0)
+#define STEPS_Y (BIT0)
+
 /** Y axis steps output (P2.1) */
-#define STEPS_Y (BIT1)
-/** Z axis steps output (P2.2) */
-#define STEPS_Z (BIT2)
-/** Z rotation driver steps output (P2.3) */
-#define STEPS_RZ (BIT3)
-/** Solder driver steps output (P2.4) */
-#define STEPS_S (BIT4)
+#define STEPS_X (BIT1)
+
+/** Z axis steps output (P2.5) */
+#define STEPS_Z (BIT5)
+
+/** Z rotation driver steps output (1.6) */
+#define STEPS_RZ (BIT6)
+
+/** Solder driver steps output (P1.7) */
+#define STEPS_S (BIT7)
 
 /* Directions outputs */
-/** X axis direction (P1.4). */
-#define DIR_X (BIT4)
-/** Y axis direction (P1.5). */
-#define DIR_Y (BIT5)
-/** Z axis direction (P1.6). */
-#define DIR_Z (BIT6)
-/** Z axis rotation direction (P2.5). */
-#define DIR_RZ (BIT5)
-/** Solder piston direction (P2.6). */
-#define DIR_S (BIT6)
+/** X axis direction (P1.5). */
+#define DIR_X (BIT5)
+
+/** Y axis direction (P1.4). */
+#define DIR_Y (BIT4)
+
+/** Z axis direction (P2.2). */
+#define DIR_Z (BIT2)
+
+/** Z axis rotation direction (P2.3). */
+#define DIR_RZ (BIT3)
+
+/** Solder piston direction (P2.4). */
+#define DIR_S (BIT4)
 
 /* Global enable output */
-/** Global driver enable (P1.7). Enables drivers when set to zero. */
-#define ENABLE (BIT7)
+/** Global driver enable (P2.6). Enables drivers when set to zero. */
+#define ENABLE (BIT6)
 
 /* Vacuum enable output */
 /** Vacuum enable (P2.7). Enables vacuum when one, disables when zero. */
 #define VACUUM (BIT7)
-
-/* Output groups selection */
-/** Select all steps outputs (P2). */
-#define ALLSTEPS (STEPS_X | STEPS_Y | STEPS_Z | STEPS_RZ | STEPS_S)
 
 /* String buffers sizes in bytes */
 /** Size in bytes (characters) for the received string */
@@ -79,13 +85,13 @@
 #define RESET_STEPS_Z (P2OUT &= ~STEPS_Z)
 #define TOGGLE_STEPS_Z (P2OUT ^= STEPS_Z)
 
-#define SET_STEPS_RZ (P2OUT |= STEPS_RZ)
-#define RESET_STEPS_RZ (P2OUT &= ~STEPS_RZ)
-#define TOGGLE_STEPS_RZ (P2OUT ^= STEPS_RZ)
+#define SET_STEPS_RZ (P1OUT |= STEPS_RZ)
+#define RESET_STEPS_RZ (P1OUT &= ~STEPS_RZ)
+#define TOGGLE_STEPS_RZ (P1OUT ^= STEPS_RZ)
 
-#define SET_STEPS_S (P2OUT |= STEPS_S)
-#define RESET_STEPS_S (P2OUT &= ~STEPS_S)
-#define TOGGLE_STEPS_S (P2OUT ^= STEPS_S)
+#define SET_STEPS_S (P1OUT |= STEPS_S)
+#define RESET_STEPS_S (P1OUT &= ~STEPS_S)
+#define TOGGLE_STEPS_S (P1OUT ^= STEPS_S)
 
 /* Helper macros for DIRs outputs */
 #define SET_DIR_X (P1OUT |= DIR_X)
@@ -96,9 +102,9 @@
 #define RESET_DIR_Y (P1OUT &= ~DIR_Y)
 #define TOGGLE_DIR_Y (P1OUT ^= DIR_Y)
 
-#define SET_DIR_Z (P1OUT |= DIR_Z)
-#define RESET_DIR_Z (P1OUT &= ~DIR_Z)
-#define TOGGLE_DIR_Z (P1OUT ^= DIR_Z)
+#define SET_DIR_Z (P2OUT |= DIR_Z)
+#define RESET_DIR_Z (P2OUT &= ~DIR_Z)
+#define TOGGLE_DIR_Z (P2OUT ^= DIR_Z)
 
 #define SET_DIR_RZ (P2OUT |= DIR_RZ)
 #define RESET_DIR_RZ (P2OUT &= ~DIR_RZ)
@@ -112,9 +118,9 @@
 #define CCW (0)
 
 /* Helper macros for global enable output */
-#define SET_ENABLE (P1OUT |= ENABLE)
-#define RESET_ENABLE (P1OUT &= ~ENABLE)
-#define TOGGLE_ENABLE (P1OUT ^= ENABLE)
+#define SET_ENABLE (P2OUT |= ENABLE)
+#define RESET_ENABLE (P2OUT &= ~ENABLE)
+#define TOGGLE_ENABLE (P2OUT ^= ENABLE)
 
 /* Helper macros for vacuum enable output */
 #define SET_VACUUM (P2OUT |= VACUUM)

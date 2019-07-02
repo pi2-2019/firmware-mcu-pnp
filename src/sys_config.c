@@ -38,28 +38,31 @@ void initial_setup(void)
 	
 	/*
 	 * Set the other pins as outputs
-	 * P2.0, P2.1, P2.2, P2.3 and P2.4 are the STEPS outputs and will be
-	 * initially set to zero.
+	 * P2.0 (Y), P2.1 (X), P1.7 (S), P1.6 (RZ), P2.5 (Z) are the STEPS
+	 * outputs and will be initially set to zero.
 	 *
-	 * P1.4, P1.5, P1.6, P2.5, P2.6 are DIR outputs and will be initially
-	 * set to zero
+	 * P1.4 (DIRY), P1.5 (DIRX), P2.2 (DIRZ), P2.4 (DIRSOLDER), P2.3 (DIRRZ)
+	 * are DIR outputs and will be initially set to zero.
 	 *
-	 * P1.7 is the global driver enable pin and will be set to one in order
-	 * to start the system with the drivers turned off (ENABLE' pin).
+	 * P2.6 is the optional global driver enable pin and will be set to one
+	 * in order to start the system with the drivers turned off (ENABLE'
+	 * pin).
 	 *
-	 * P2.7 controls the vacuum pump and will be set initially as zero (no
-	 * vacuum).
+	 * P2.7 controls the vacuum pump and will be set initially as zero
+	 * (vacuum on).
 	 */
-	P2DIR |= ALLSTEPS;
-	P2OUT &= ~ALLSTEPS;
+	P1DIR |= (STEPS_S | STEPS_RZ);
+	P1OUT &= ~(STEPS_S | STEPS_RZ);
+	P2DIR |= (STEPS_Y | STEPS_X | STEPS_Z);
+	P2OUT &= ~(STEPS_Y | STEPS_X | STEPS_Z);
 	
-	P1DIR |= (DIR_X | DIR_Y| DIR_Z);
-	P2DIR |= (DIR_RZ | DIR_S);
-	P1OUT &= ~(DIR_X | DIR_Y| DIR_Z);
-	P2OUT &= ~(DIR_RZ | DIR_S);
+	P1DIR |= (DIR_X | DIR_Y);
+	P1OUT &= ~(DIR_X | DIR_Y);
+	P2DIR |= (DIR_RZ | DIR_S | DIR_Z);
+	P2OUT &= ~(DIR_RZ | DIR_S | DIR_Z);
 	
-	P1DIR |= ENABLE;
-	P1OUT |= ENABLE;
+	P2DIR |= ENABLE;
+	P2OUT |= ENABLE;
 	
 	P2DIR |= VACUUM;
 	P2OUT &= ~VACUUM;
