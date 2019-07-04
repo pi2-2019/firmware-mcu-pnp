@@ -15,6 +15,11 @@
 #include "sys_control.h"
 #include "timers.h"
 
+/** Maximum Z axis position in mm while in solder routine */
+const float max_z_solder = 53.2f;
+/** Maximum Z axis position in mm while in regular routine */
+const float max_z_component = 64.41f;
+
 void calibrate()
 {
 	/*
@@ -52,6 +57,7 @@ void calibrate()
 	if (!curr_status.end_n_triggd) {
 		send_string("\r\nCalibration error on X axis\r\n");
 		curr_status.calibrated = 0;
+		curr_status.error = 1;
 		return;
 	}
 	curr_status.end_n_triggd = 0;
@@ -79,24 +85,12 @@ void calibrate()
 	if (!curr_status.end_n_triggd) {
 		send_string("\r\nCalibration error on Y axis\r\n");
 		curr_status.calibrated = 0;
+		curr_status.error = 1;
 		return;
 	}
 	curr_status.end_n_triggd = 0;
 	
-	/* Move Z axis and return to zero */
-	SET_DIR_Z;
-	while((!curr_status.end_p_triggd) && (!curr_status.end_n_triggd)) {
-		TOGGLE_STEPS_Z;
-		__delay_cycles(MIN_PULSE_CALIB_XYZ);
-	}
-
-	if (!curr_status.end_p_triggd) {
-		send_string("\r\nCalibration error on Z axis\r\n");
-		curr_status.calibrated = 0;
-		curr_status.error = 1;
-		return;
-	}
-	curr_status.end_p_triggd = 0;
+	/* Move Z axis to zero */
 	RESET_DIR_Z;
 	while((!curr_status.end_p_triggd) && (!curr_status.end_n_triggd)) {
 		TOGGLE_STEPS_Z;
@@ -106,6 +100,7 @@ void calibrate()
 	if (!curr_status.end_n_triggd) {
 		send_string("\r\nCalibration error on Z axis\r\n");
 		curr_status.calibrated = 0;
+		curr_status.error = 1;
 		return;
 	}
 	curr_status.end_n_triggd = 0;
@@ -125,11 +120,25 @@ void calibrate()
 }
 
 void move()
-{	if (!curr_status.error) {
+{
+	unsigned int period;
+	
+	if (!curr_status.error) {
 		/* Move as fast as the slowest motor */
+		if (curr_status.z != req_status.z) {
+			/* Slowest motor */
+			period = MIN_PULSE_PERIOD_ZDIR;
+		} else if (curr_status.x != req_status.x) {
+			/* Second slowest motor */
+			period = MIN_PULSE_PERIOD_XDIR;
+		} else {
+			/* Fastest */
+			period = MIN_PULSE_PERIOD_YDIR;
+		}
+
 		bresenham_3d(curr_status.x, curr_status.y, curr_status.z,
 				req_status.x, req_status.y, req_status.z,
-				MIN_PULSE_PERIOD_ZDIR);
+				period);
 				
 		/* Initial position must always be treated as zero */
 		move_rz(0, req_status.rz, MIN_PULSE_PERIOD_ROT);
@@ -147,6 +156,7 @@ void move()
 void status()
 {
 	send_string("\r\n");
+	send_string("mm abs\r\n");
 	
 	send_string("X ");
 	print_float(curr_status.x);
@@ -162,6 +172,17 @@ void status()
 	
 	send_string("E ");
 	print_float(curr_status.solder);
+	send_string("\r\n");
+	
+	send_string("Solder? ");
+	if (curr_status.solder_routine)
+		send_string("yes");
+	else
+		send_string("no");
+	send_string("\r\n");
+	
+	send_string("Zmax ");
+	print_float(curr_status.zmax);
 	send_string("\r\n");
 	
 	send_string("Vacuum ");
@@ -204,10 +225,13 @@ void status()
 
 void eval_command()
 {
+	/** G/M-code to be executed */
 	int cmd = 0;
+	/** Parsed G-code is unknown? 1 if yes*/
 	char uknown_gc = 0;
+	/** Parsed M-code is unknown? 1 if yes*/
 	char uknown_mc = 0;
-	
+
 	/* Get the G-code */
 	cmd = parse_param('G', -1);
 	
@@ -219,8 +243,42 @@ void eval_command()
 		req_status.y = parse_param('Y', curr_status.y);
 		req_status.z = parse_param('Z', curr_status.z);
 		req_status.rz = parse_param('C', curr_status.rz);
-		req_status.solder = parse_param('E', curr_status.solder);
+		req_status.solder = parse_param('E', FLT_MAX);
 		
+		/* If no solder will be used, set Z max to vacuum tip */		
+		if (req_status.solder == FLT_MAX) {
+			/* Will not solder */
+			req_status.solder = curr_status.solder;
+			
+			req_status.zmax = max_z_component;
+			req_status.solder_routine = 0;
+			
+			curr_status.zmax = max_z_component;
+			curr_status.solder_routine = 0;
+		} else {
+			req_status.zmax = max_z_solder;
+			req_status.solder_routine = 1;
+			
+			curr_status.zmax = max_z_solder;
+			curr_status.solder_routine = 1;
+		}
+		
+		if (curr_status.solder_routine) {
+			if (req_status.solder > req_status.zmax) {
+				send_string("Zmax ");
+				print_float(curr_status.zmax);
+				send_string("\r\n");
+				req_status.solder = curr_status.zmax;
+			}
+			
+			if (req_status.z > req_status.zmax) {
+				send_string("Zmax ");
+				print_float(curr_status.zmax);
+				send_string("\r\n");
+				req_status.z = curr_status.zmax;
+			}
+		}
+
 		move();
 		break;
 	case 33:

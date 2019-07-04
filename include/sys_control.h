@@ -15,13 +15,21 @@ struct status {
 	float rz;
 	float solder;
 	
+	float zmax;
+	
 	char vacuum;
 	char calibrated;
 	char error;
+	char solder_routine;
 	
 	char end_p_triggd;
 	char end_n_triggd;
 };
+
+/** Maximum Z axis position in mm while in solder routine */
+const float max_z_solder;
+/** Maximum Z axis position in mm while in regular routine */
+const float max_z_component;
 
 struct status curr_status;
 struct status req_status;
