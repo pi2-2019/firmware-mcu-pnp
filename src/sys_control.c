@@ -15,10 +15,10 @@
 #include "sys_control.h"
 #include "timers.h"
 
-/** Maximum Z axis position in mm while in solder routine */
-const float max_z_solder = 53.2f;
-/** Maximum Z axis position in mm while in regular routine */
-const float max_z_component = 64.41f;
+/** Maximum Z axis position in mm while in solder routine  53.2 mm*/
+const float max_z_solder = 12.7f;
+/** Maximum Z axis position in mm while in regular routine 64.41 mm*/
+const float max_z_component = 16.0f;
 
 void calibrate()
 {
@@ -36,75 +36,101 @@ void calibrate()
 	
 	/* Move X axis to X+ and return to zero in X- */
 	SET_DIR_X;
+	send_string("\r\nGoto X+\r\n");
+	
 	while((!curr_status.end_p_triggd) && (!curr_status.end_n_triggd)) {
 		TOGGLE_STEPS_X;
 		__delay_cycles(MIN_PULSE_CALIB_XYZ);
 	}
 
 	if (!curr_status.end_p_triggd) {
-		send_string("\r\nCalibration error on X axis\r\n");
+		send_string("\r\nError on X\r\n");
 		curr_status.calibrated = 0;
 		curr_status.error = 1;
 		return;
 	}
+	send_string("\r\nX+ OK\r\n");
+
 	curr_status.end_p_triggd = 0;
+
 	RESET_DIR_X;
+	send_string("\r\nGoto X-\r\n");
+	
 	while((!curr_status.end_p_triggd) && (!curr_status.end_n_triggd)) {
 		TOGGLE_STEPS_X;
 		__delay_cycles(MIN_PULSE_CALIB_XYZ);
 	}
 
 	if (!curr_status.end_n_triggd) {
-		send_string("\r\nCalibration error on X axis\r\n");
+		send_string("\r\nError on X\r\n");
 		curr_status.calibrated = 0;
 		curr_status.error = 1;
 		return;
 	}
+	send_string("\r\nX- OK\r\n");
+
 	curr_status.end_n_triggd = 0;
 	
 	/* Move Y axis and return to zero */
 	SET_DIR_Y;
+	send_string("\r\nGoto Y+\r\n");
+	
 	while((!curr_status.end_p_triggd) && (!curr_status.end_n_triggd)) {
 		TOGGLE_STEPS_Y;
 		__delay_cycles(MIN_PULSE_CALIB_XYZ);
 	}
 
 	if (!curr_status.end_p_triggd) {
-		send_string("\r\nCalibration error on Y axis\r\n");
+		send_string("\r\nError on Y\r\n");
 		curr_status.calibrated = 0;
 		curr_status.error = 1;
 		return;
 	}
+	send_string("\r\nY+ OK\r\n");
+
 	curr_status.end_p_triggd = 0;
+
 	RESET_DIR_Y;
+	send_string("\r\nGoto Y-\r\n");
+	
 	while((!curr_status.end_p_triggd) && (!curr_status.end_n_triggd)) {
 		TOGGLE_STEPS_Y;
 		__delay_cycles(MIN_PULSE_CALIB_XYZ);
 	}
 
 	if (!curr_status.end_n_triggd) {
-		send_string("\r\nCalibration error on Y axis\r\n");
+		send_string("\r\nError on Y\r\n");
 		curr_status.calibrated = 0;
 		curr_status.error = 1;
 		return;
 	}
+	send_string("\r\nY- OK\r\n");
+
 	curr_status.end_n_triggd = 0;
 	
 	/* Move Z axis to zero */
 	RESET_DIR_Z;
+	send_string("\r\nGoto Z-\r\n");
+	start_t1_a3_c0(MIN_PULSE_CALIB_XYZ);
 	while((!curr_status.end_p_triggd) && (!curr_status.end_n_triggd)) {
 		TOGGLE_STEPS_Z;
-		__delay_cycles(MIN_PULSE_CALIB_XYZ);
+		/* Wait */
+		while(!(TA1CTL & TAIFG));
+		TA1CTL &= ~TAIFG;
+		curr_status.end_p_triggd = curr_status.end_p_triggd;
+		curr_status.end_n_triggd = curr_status.end_n_triggd;
 	}
 
 	if (!curr_status.end_n_triggd) {
-		send_string("\r\nCalibration error on Z axis\r\n");
+		send_string("\r\nError on Z\r\n");
 		curr_status.calibrated = 0;
 		curr_status.error = 1;
 		return;
 	}
+	send_string("\r\nZ- OK\r\n");
+
 	curr_status.end_n_triggd = 0;
-	
+
 	curr_status.calibrated = 1;
 	curr_status.x = 0;
 	curr_status.y = 0;
@@ -115,7 +141,7 @@ void calibrate()
 	curr_status.end_p_triggd = 0;
 	curr_status.end_n_triggd = 0;
 	curr_status.error = 0;
-	
+
 	send_string("\r\ndone\r\n");
 }
 
@@ -148,13 +174,16 @@ void move()
 				
 		send_string("\r\ndone\r\n");
 	} else {
-		send_string("\r\nPlease recalibrate\r\n");
+		send_string("\r\nRECAL\r\n");
 		send_string("\r\ndone\r\n");
 	}
 }
 
 void status()
 {
+	char yes_str[] = "Y\r\n";
+	char no_str[] = "N\r\n";
+	
 	send_string("\r\n");
 	send_string("mm abs\r\n");
 	
@@ -174,51 +203,45 @@ void status()
 	print_float(curr_status.solder);
 	send_string("\r\n");
 	
-	send_string("Solder? ");
+	send_string("SDR ");
 	if (curr_status.solder_routine)
-		send_string("yes");
+		send_string(yes_str);
 	else
-		send_string("no");
-	send_string("\r\n");
+		send_string(no_str);
 	
-	send_string("Zmax ");
+	send_string("ZM ");
 	print_float(curr_status.zmax);
 	send_string("\r\n");
 	
-	send_string("Vacuum ");
+	send_string("VAC ");
 	if (curr_status.vacuum)
-		send_string("on");
+		send_string(yes_str);
 	else
-		send_string("off");
-	send_string("\r\n");
+		send_string(no_str);
 	
-	send_string("Calibrated ");
+	send_string("CAL ");
 	if (curr_status.calibrated)
-		send_string("yes");
+		send_string(yes_str);
 	else
-		send_string("no");
-	send_string("\r\n");
+		send_string(no_str);
 	
-	send_string("Error ");
+	send_string("ERR ");
 	if (curr_status.error)
-		send_string("yes");
+		send_string(yes_str);
 	else
-		send_string("no");
-	send_string("\r\n");
+		send_string(no_str);
 	
-	send_string("Endstop + ");
+	send_string("EP ");
 	if(curr_status.end_p_triggd)
-		send_string("yes");
+		send_string(yes_str);
 	else
-		send_string("no");
-	send_string("\r\n");
+		send_string(no_str);
 	
-	send_string("Endstop - ");
+	send_string("EN ");
 	if(curr_status.end_n_triggd)
-		send_string("yes");
+		send_string(yes_str);
 	else
-		send_string("no");
-	send_string("\r\n");
+		send_string(no_str);
 	
 	send_string("done\r\n");
 }
@@ -262,21 +285,12 @@ void eval_command()
 			curr_status.zmax = max_z_solder;
 			curr_status.solder_routine = 1;
 		}
-		
-		if (curr_status.solder_routine) {
-			if (req_status.solder > req_status.zmax) {
-				send_string("Zmax ");
-				print_float(curr_status.zmax);
-				send_string("\r\n");
-				req_status.solder = curr_status.zmax;
-			}
-			
-			if (req_status.z > req_status.zmax) {
-				send_string("Zmax ");
-				print_float(curr_status.zmax);
-				send_string("\r\n");
-				req_status.z = curr_status.zmax;
-			}
+
+		if (req_status.z >= req_status.zmax) {
+			send_string("ZM ");
+			print_float(curr_status.zmax);
+			send_string("\r\n");
+			req_status.z = curr_status.zmax;
 		}
 
 		move();
@@ -330,7 +344,7 @@ void eval_command()
 	}
 	
 	if (uknown_gc && uknown_mc) {
-		send_string("\r\nUnknown G/M-Code\r\n");
+		send_string("\r\nG/M-Code?\r\n");
 		send_string("done\r\n");
 	}
 	

@@ -8,16 +8,16 @@
 void __attribute__ ((interrupt(USCIAB0RX_VECTOR))) received_data_ISR (void)
 {
 	/* deactivate interruptions */
-	__bic_SR_register(GIE);
-	
+	//__bic_SR_register(GIE);
+
 	volatile char c;
 	/** Automatically initialized as zero */
 	static int i;
-	
+
 	/* Store character in buffer */
 	c = UCA0RXBUF;
 	rx_data_raw[i] = c;
-	
+
 	/*
 	 * Check if any transmission is still happening 
 	 * Echo received character
@@ -26,7 +26,7 @@ void __attribute__ ((interrupt(USCIAB0RX_VECTOR))) received_data_ISR (void)
 	UCA0TXBUF = UCA0RXBUF;
 	/* Wait while UART is transmitting the byte */
 	while (UCA0STAT & UCBUSY);
-	
+
 	/*
 	 * if counter is greater than maximum size or '\0' was
 	 * sent, allow the rx buffer to be validated. Otherwise
@@ -40,35 +40,34 @@ void __attribute__ ((interrupt(USCIAB0RX_VECTOR))) received_data_ISR (void)
 	} else {
 		i++;
 	}
-	
+
 	/* activate interruptions */
-	__bis_SR_register_on_exit(GIE);
+	//__bis_SR_register_on_exit(GIE);
 }
 
 void __attribute__ ((interrupt(PORT1_VECTOR))) port1_ISR (void)
 {
 	/* deactivate interruptions */
-	__bic_SR_register(GIE);
-	
+	//__bic_SR_register(GIE);
+
 	/* Endstop sensor was triggered, kill the motors */
 	stop_t1_a3_c0();
-	
+
 	curr_status.end_p_triggd = (P1IFG & SW0);
 	curr_status.end_n_triggd = (P1IFG & SW1);
-	P1IFG = 0;
-	
-	if (curr_status.calibrated) {
-		curr_status.calibrated = 0;
-		req_status.error = 1;
-		curr_status.error = 1;
-	}
-	
+
+	curr_status.calibrated = 0;
+	req_status.error = 1;
+	curr_status.error = 1;
+
 	if (curr_status.end_p_triggd)
-		send_string("\r\nENDSTOP + TRIGGERED\r\n");
-		
+		send_string("\r\nEP H\r\n");
+
 	if (curr_status.end_n_triggd)
-		send_string("\r\nENDSTOP - TRIGGERED\r\n");
-	
+		send_string("\r\nEN H\r\n");
+
+	P1IFG = 0;
+
 	/* activate interruptions */
-	__bis_SR_register_on_exit(GIE);
+	//__bis_SR_register_on_exit(GIE);
 }

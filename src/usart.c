@@ -143,7 +143,7 @@ float parse_param(char c, float dft_ret)
 			|| (*tmp_str == '*') || (*tmp_str == '(')) {
 			break;
 		} else {
-			send_string("Parsing error\r\n");
+			send_string("PARSE?\r\n");
 			memset(rx_data_raw, 0, RX_STR_SIZE);
 			return dft_ret;
 		}
