@@ -147,16 +147,16 @@
  * @brief Max RPM for Y axis
  * For the 24 kgf*cm motors in the Y direction
  * Simulation shows the minimum torque required is 9,4 kgf*cm.
- * In order to work at 12 kgf*cm the motors may run, considering the average
- * torque loss:
+ * In order to work at 23,4 kgf*cm the motors may run, considering the average
+ * torque loss (0,6 kgf*cm):
  *
- * At 444 RPM:
- * (1/32 step) 106*444 ~ 47064 Hz (21,25 us)
+ * At 20 RPM:
+ * (1/32 step) 106*20 ~ 2120 Hz (471,70 us)
  *
  * With SMCLK at 8 MHz and output mode 4 (toggle) 
- * set PWM period as 85*125ns*2 = 21,25 us
+ * set PWM period as 1887*125ns*2 = 471,75 us
  */
-#define MIN_PULSE_PERIOD_YDIR (85-1)
+#define MIN_PULSE_PERIOD_YDIR (1887-1)
 
 /**
  * @brief Max RPM for X axis
@@ -177,29 +177,29 @@
  * @brief Max RPM for Z axis
  * For the 4,2 kgf*cm motors in the Z direction
  * Simulation shows the minimum torque required is 2 kgf*cm.
- * In order to work at 2,5 kgf*cm the motors may run, considering the worse case
- * torque loss:
+ * In order to work at 2,5 kgf*cm the motors may run, considering the best case
+ * torque loss of 1,7 kgf*cm:
  *
- * At 8 RPM:
- * (1/32 step) 106*8 ~ 848 Hz (1,179 ms)
+ * At 62 RPM:
+ * (1/32 step) 106*62 ~ 6572 Hz (152,16 us)
  *
  * With SMCLK at 8 MHz and output mode 4 (toggle) 
- * set PWM period as 4717*125ns*2 = 1,179 ms
+ * set PWM period as 608*125ns*2 = 6,5789 ms
  */
-#define MIN_PULSE_PERIOD_ZDIR (4717-1)
+#define MIN_PULSE_PERIOD_ZDIR (608-1)
 
 /**
  * @brief Max RPM for solder extruder
  * Same configurations as #MIN_PULSE_PERIOD_ZDIR
  */
-#define MIN_PULSE_PERIOD_SOLDER (4717-1)
+#define MIN_PULSE_PERIOD_SOLDER (608-1)
 
 /**
  * @brief Max RPM for C axis
- * Negligible load on the motor 0,6 kgf*cm motor. In order to work with
- * 0,2 kgf*cm in the best case scenario there will be a loss of 0,4 kgf*cm.
+ * Negligible load on the 0,22 kgf*cm motor. In order to work with
+ * 0,1 kgf*cm in the best case scenario there will be a loss of 0,12 kgf*cm.
  *
- * At 14 RPM:
+ * At 4 RPM:
  * (1/32 step) 106*4 ~ 424 Hz (2,358 ms)
  *
  * With SMCLK at 8 MHz and output mode 4 (toggle) 
@@ -221,31 +221,31 @@
  * 5 mm = 32*200 steps = 6400 steps 
  * 1 mm = 1280 steps
  */
-#define STEPS_PER_MM_X (1280)
+#define STEPS_PER_MM_X (324)
 /** @brief Y axis steps per mm constant
  * GT-2 belt provides 14 mm per motor rotation. The system is configured to run
  * with 1/32 microstep, with 200 steps per rotation step motors, so:
- * 14 mm = 32*200 steps = 6400 steps 
+ * 14 mm = 32*200 steps = 6400 steps
  * 1 mm = 3200/7 steps ~ 457 steps
  */
-#define STEPS_PER_MM_Y (457)
+#define STEPS_PER_MM_Y (319)
 /** @brief Z axis steps per mm constant
  * Fuse provides 1,5 mm per motor rotation. The system is configured to run
  * with 1/32 microstep, with 200 steps per rotation step motors, so:
- * 1,5 mm = 32*200 steps = 6400 steps 
+ * 1,5 mm = 32*200 steps = 6400 steps
  * 1 mm ~ 4267 steps
  */
 #define STEPS_PER_MM_Z (4267)
 /** @brief Solder extruder steps per mm constant
  * Fuse provides 1,5 mm per motor rotation. The system is configured to run
  * with 1/32 microstep, with 200 steps per rotation step motors, so:
- * 1,5 mm = 32*200 steps = 6400 steps 
+ * 1,5 mm = 32*200 steps = 6400 steps
  * 1 mm ~ 4267 steps
  */
 #define STEPS_PER_MM_S (4267)
 /** @brief C axis (RZ) steps per mm constant
  * Motor completes 360 degrees in 200 steps, but system uses 1/32 microsteps.
- * 360° = 32*200 steps = 6400 steps 
+ * 360° = 32*200 steps = 6400 steps
  * 1° = 160/9 steps ~ 18 steps
  */
 #define STEPS_PER_DEG_RZ (18)
