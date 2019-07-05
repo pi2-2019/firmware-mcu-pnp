@@ -3,6 +3,7 @@
 #include "sys_config.h"
 #include "interrupts.h"
 #include "usart.h"
+#include "sys_control.h"
 
 int main(void)
 {
@@ -14,7 +15,9 @@ int main(void)
 
 	__bis_SR_register(GIE);
 
-	while(1);
+	while(1) {
+		eval_command();
+	}
 
 	return 0;
 }

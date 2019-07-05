@@ -3,6 +3,8 @@
 #include "sys_config.h"
 #include "sys_control.h"
 
+volatile char execute_routine = 0;
+
 void initial_setup(void)
 {
 	/*

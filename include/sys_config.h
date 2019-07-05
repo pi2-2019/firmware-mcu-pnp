@@ -209,9 +209,9 @@
 
 /**
  * @brief Max RPM for XYZ calibration routine
- * 4 RPM (see #MIN_PULSE_PERIOD_ZDIR)
+ * 10 RPM (see #MIN_PULSE_PERIOD_ZDIR)
  */
-#define MIN_PULSE_CALIB_XYZ (MIN_PULSE_PERIOD_ZDIR/2 - 1)
+#define MIN_PULSE_CALIB_XYZ (MIN_PULSE_PERIOD_YDIR*2 - 1)
 
 /* Motors' steps per mm constants */
 
@@ -257,6 +257,9 @@ char rx_data_raw[RX_STR_SIZE];
 char tx_data_raw[TX_STR_SIZE];
 /** Variable to store the requires steps/usteps for the desired movement */
 unsigned long int req_steps;
+
+/* Global variable to run all routines after parsing */
+volatile char execute_routine;
 
 /**
  * @brief Initialises the system.

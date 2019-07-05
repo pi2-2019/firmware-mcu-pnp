@@ -114,11 +114,7 @@ void calibrate()
 	start_t1_a3_c0(MIN_PULSE_CALIB_XYZ);
 	while((!curr_status.end_p_triggd) && (!curr_status.end_n_triggd)) {
 		TOGGLE_STEPS_Z;
-		/* Wait */
-		while(!(TA1CTL & TAIFG));
-		TA1CTL &= ~TAIFG;
-		curr_status.end_p_triggd = curr_status.end_p_triggd;
-		curr_status.end_n_triggd = curr_status.end_n_triggd;
+		__delay_cycles(MIN_PULSE_CALIB_XYZ);
 	}
 
 	if (!curr_status.end_n_triggd) {
@@ -248,6 +244,9 @@ void status()
 
 void eval_command()
 {
+	if (!execute_routine)
+		return;
+
 	/** G/M-code to be executed */
 	int cmd = 0;
 	/** Parsed G-code is unknown? 1 if yes*/
@@ -349,6 +348,8 @@ void eval_command()
 	}
 	
 	memset(rx_data_raw, 0, RX_STR_SIZE);	
+	
+	execute_routine = 0;
 }
 
 void move_solder(float p1f, float p2f, unsigned int period)
@@ -367,15 +368,23 @@ void move_solder(float p1f, float p2f, unsigned int period)
 	
 	start_t1_a3_c0(period);
 	
-	while(p1 != p2) {
+	while((p1 != p2)) {
 		p1 += ps;
 		
 		/* Move solder */
 		TOGGLE_STEPS_S;
 		
 		/* Wait */
-		while(!(TA1CTL & TAIFG));
+		while(!(TA1CTL & TAIFG)) {
+			if (curr_status.error) {
+				return;
+			}
+		}
 		TA1CTL &= ~TAIFG;
+		
+		if (curr_status.error) {
+			return;
+		}
 	}
 	stop_t1_a3_c0();
 	
@@ -399,15 +408,23 @@ void move_rz(float p1f, float p2f, unsigned int period)
 	
 	start_t1_a3_c0(period);
 	
-	while(p1 != p2) {
+	while((p1 != p2)) {
 		p1 += ps;
 		
 		/* Move rz */
 		TOGGLE_STEPS_RZ;
 		
 		/* Wait */
-		while(!(TA1CTL & TAIFG));
+		while(!(TA1CTL & TAIFG)) {
+			if (curr_status.error) {
+				return;
+			}
+		}
 		TA1CTL &= ~TAIFG;
+		
+		if (curr_status.error) {
+			return;
+		}
 	}
 	stop_t1_a3_c0();
 	
@@ -465,7 +482,7 @@ void bresenham_3d(float x1f, float y1f, float z1f,
 		p1 = 2*dy - dx;
 		p2 = 2*dz - dx;
 		
-		while (x1 != x2) {
+		while ((x1 != x2)) {
 			TOGGLE_STEPS_X;
 			x1 += xs;
 			if (p1 >= 0) {
@@ -482,15 +499,23 @@ void bresenham_3d(float x1f, float y1f, float z1f,
 			p2 += 2*dz;
 			
 			/* Wait */
-			while(!(TA1CTL & TAIFG));
+			while(!(TA1CTL & TAIFG)) {
+				if (curr_status.error) {
+					return;
+				}
+			}
 			TA1CTL &= ~TAIFG;
+			
+			if (curr_status.error) {
+				return;
+			}
 		}
 	/* Drive Y Axis */
 	} else if ((dy >= dx) && (dy >= dz)) {
 		p1 = 2*dx - dy;
 		p2 = 2*dz - dy;
 		
-		while (y1 != y2) {
+		while ((y1 != y2)) {
 			TOGGLE_STEPS_Y;
 			y1 += ys;
 			if (p1 >= 0) {
@@ -507,15 +532,23 @@ void bresenham_3d(float x1f, float y1f, float z1f,
 			p2 += 2*dz;
 			
 			/* Wait */
-			while(!(TA1CTL & TAIFG));
+			while(!(TA1CTL & TAIFG)) {
+				if (curr_status.error) {
+					return;
+				}
+			}
 			TA1CTL &= ~TAIFG;
+			
+			if (curr_status.error) {
+				return;
+			}
 		}
 	/* Drive Z Axis */
 	} else {
 		p1 = 2*dy - dz;
 		p2 = 2*dx - dz;
 		
-		while (z1 != z2) {
+		while ((z1 != z2)) {
 			TOGGLE_STEPS_Z;
 			z1 += zs;
 			if (p1 >= 0) {
@@ -532,8 +565,16 @@ void bresenham_3d(float x1f, float y1f, float z1f,
 			p2 += 2*dx;
 
 			/* Wait */
-			while(!(TA1CTL & TAIFG));
+			while(!(TA1CTL & TAIFG)) {
+				if (curr_status.error) {
+					return;
+				}
+			}
 			TA1CTL &= ~TAIFG;
+			
+			if (curr_status.error) {
+				return;
+			}
 		}
 	}
 	stop_t1_a3_c0();

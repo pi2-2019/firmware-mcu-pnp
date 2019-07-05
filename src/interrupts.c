@@ -36,7 +36,7 @@ void __attribute__ ((interrupt(USCIAB0RX_VECTOR))) received_data_ISR (void)
 	if ((i >= RX_STR_SIZE) || (c == '\0') || (c == ';') || (c == '*')
 		|| (c == '(')) {
 		i = 0;
-		eval_command();
+		execute_routine = 1;
 	} else {
 		i++;
 	}
