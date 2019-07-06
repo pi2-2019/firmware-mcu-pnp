@@ -34,25 +34,7 @@ void calibrate()
 	curr_status.end_p_triggd = 0;
 	curr_status.end_n_triggd = 0;
 	
-	/* Move X axis to X+ and return to zero in X- */
-	SET_DIR_X;
-	send_string("\r\nGoto X+\r\n");
-	
-	while((!curr_status.end_p_triggd) && (!curr_status.end_n_triggd)) {
-		TOGGLE_STEPS_X;
-		__delay_cycles(MIN_PULSE_CALIB_XYZ);
-	}
-
-	if (!curr_status.end_p_triggd) {
-		send_string("\r\nError on X\r\n");
-		curr_status.calibrated = 0;
-		curr_status.error = 1;
-		return;
-	}
-	send_string("\r\nX+ OK\r\n");
-
-	curr_status.end_p_triggd = 0;
-
+	/* Move X axis to X- */
 	RESET_DIR_X;
 	send_string("\r\nGoto X-\r\n");
 	
@@ -71,26 +53,8 @@ void calibrate()
 
 	curr_status.end_n_triggd = 0;
 	
-	/* Move Y axis and return to zero */
+	/* Move Y axis to zero */
 	SET_DIR_Y;
-	send_string("\r\nGoto Y+\r\n");
-	
-	while((!curr_status.end_p_triggd) && (!curr_status.end_n_triggd)) {
-		TOGGLE_STEPS_Y;
-		__delay_cycles(MIN_PULSE_CALIB_XYZ);
-	}
-
-	if (!curr_status.end_p_triggd) {
-		send_string("\r\nError on Y\r\n");
-		curr_status.calibrated = 0;
-		curr_status.error = 1;
-		return;
-	}
-	send_string("\r\nY+ OK\r\n");
-
-	curr_status.end_p_triggd = 0;
-
-	RESET_DIR_Y;
 	send_string("\r\nGoto Y-\r\n");
 	
 	while((!curr_status.end_p_triggd) && (!curr_status.end_n_triggd)) {
@@ -147,15 +111,15 @@ void move()
 	
 	if (!curr_status.error) {
 		/* Move as fast as the slowest motor */
-		if (curr_status.z != req_status.z) {
+		if (curr_status.y != req_status.y) {
 			/* Slowest motor */
-			period = MIN_PULSE_PERIOD_ZDIR;
+			period = MIN_PULSE_PERIOD_YDIR;
 		} else if (curr_status.x != req_status.x) {
 			/* Second slowest motor */
 			period = MIN_PULSE_PERIOD_XDIR;
 		} else {
 			/* Fastest */
-			period = MIN_PULSE_PERIOD_YDIR;
+			period = MIN_PULSE_PERIOD_ZDIR;
 		}
 
 		bresenham_3d(curr_status.x, curr_status.y, curr_status.z,
@@ -361,10 +325,11 @@ void move_solder(float p1f, float p2f, unsigned int period)
 	
 	ps = (p2 > p1) ? 1 : -1;
 	
+	/* Positive downwards */
 	if (ps == 1)
-		SET_DIR_S;
-	else
 		RESET_DIR_S;
+	else
+		SET_DIR_S;
 	
 	start_t1_a3_c0(period);
 	
@@ -374,17 +339,9 @@ void move_solder(float p1f, float p2f, unsigned int period)
 		/* Move solder */
 		TOGGLE_STEPS_S;
 		
-		/* Wait */
-		while(!(TA1CTL & TAIFG)) {
-			if (curr_status.error) {
-				return;
-			}
-		}
+		/* Wait. If an endstop is hit, stop the machine */
+		while(!(TA1CTL & TAIFG));
 		TA1CTL &= ~TAIFG;
-		
-		if (curr_status.error) {
-			return;
-		}
 	}
 	stop_t1_a3_c0();
 	
@@ -401,6 +358,7 @@ void move_rz(float p1f, float p2f, unsigned int period)
 	
 	ps = (p2 > p1) ? 1 : -1;
 	
+	/* Positive clockwise */
 	if (ps == 1)
 		SET_DIR_RZ;
 	else
@@ -414,22 +372,15 @@ void move_rz(float p1f, float p2f, unsigned int period)
 		/* Move rz */
 		TOGGLE_STEPS_RZ;
 		
-		/* Wait */
-		while(!(TA1CTL & TAIFG)) {
-			if (curr_status.error) {
-				return;
-			}
-		}
+		/* Wait. If an endstop is hit, stop the machine */
+		while(!(TA1CTL & TAIFG));
 		TA1CTL &= ~TAIFG;
-		
-		if (curr_status.error) {
-			return;
-		}
 	}
 	stop_t1_a3_c0();
 	
 	/* Update position */
-	curr_status.rz = req_status.rz;
+	curr_status.rz = 0;
+	req_status.rz = 0;
 }
 
 void bresenham_3d(float x1f, float y1f, float z1f,
@@ -466,9 +417,9 @@ void bresenham_3d(float x1f, float y1f, float z1f,
 		RESET_DIR_X;
 
 	if (ys == 1)
-		SET_DIR_Y;
-	else
 		RESET_DIR_Y;
+	else
+		SET_DIR_Y;
 
 	if (zs == 1)
 		SET_DIR_Z;
@@ -498,17 +449,9 @@ void bresenham_3d(float x1f, float y1f, float z1f,
 			p1 += 2*dy;
 			p2 += 2*dz;
 			
-			/* Wait */
-			while(!(TA1CTL & TAIFG)) {
-				if (curr_status.error) {
-					return;
-				}
-			}
+			/* Wait. If an endstop is hit, stop the machine */
+			while(!(TA1CTL & TAIFG));
 			TA1CTL &= ~TAIFG;
-			
-			if (curr_status.error) {
-				return;
-			}
 		}
 	/* Drive Y Axis */
 	} else if ((dy >= dx) && (dy >= dz)) {
@@ -531,17 +474,9 @@ void bresenham_3d(float x1f, float y1f, float z1f,
 			p1 += 2*dx;
 			p2 += 2*dz;
 			
-			/* Wait */
-			while(!(TA1CTL & TAIFG)) {
-				if (curr_status.error) {
-					return;
-				}
-			}
+			/* Wait. If an endstop is hit, stop the machine */
+			while(!(TA1CTL & TAIFG));
 			TA1CTL &= ~TAIFG;
-			
-			if (curr_status.error) {
-				return;
-			}
 		}
 	/* Drive Z Axis */
 	} else {
@@ -564,17 +499,9 @@ void bresenham_3d(float x1f, float y1f, float z1f,
 			p1 += 2*dy;
 			p2 += 2*dx;
 
-			/* Wait */
-			while(!(TA1CTL & TAIFG)) {
-				if (curr_status.error) {
-					return;
-				}
-			}
+			/* Wait. If an endstop is hit, stop the machine */
+			while(!(TA1CTL & TAIFG));
 			TA1CTL &= ~TAIFG;
-			
-			if (curr_status.error) {
-				return;
-			}
 		}
 	}
 	stop_t1_a3_c0();
