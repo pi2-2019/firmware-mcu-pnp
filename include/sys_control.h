@@ -102,7 +102,8 @@ void status();
  */
 void eval_command();
 /**
- * @brief Moves solder extruder to a desired position.
+ * @brief Moves solder extruder to a desired position. Positive is downwards in
+ * millimeters. Maximum of 53 mm. No boundary checks are performed.
  * @param[in] p1: Initial position in mm, absolute.
  * @param[in] p2 Desired position in mm, absolute.
  * @param[in] period: Frequency of stepper motor pulses.
@@ -110,7 +111,8 @@ void eval_command();
  */
 void move_solder(float p1, float p2, unsigned int period);
 /**
- * @brief Moves the needle in the C axis (Z axis rotation).
+ * @brief Moves the needle in the C axis (Z axis rotation). Positive is
+ * clockwise in degrees and it is the only accepted direction.
  * @param[in] p1: Initial position in mm, absolute.
  * @param[in] p2: Desired position in mm, absolute.
  * @param[in] period: Frequency of stepper motor pulses.
@@ -118,7 +120,13 @@ void move_solder(float p1, float p2, unsigned int period);
  */
 void move_rz(float p1, float p2, unsigned int period);
 /**
- * @brief Moves the system in the X, Y and Z axis.
+ * @brief Moves the system in the X, Y and Z axis. X is positive to the left, Y
+ * is positive backwards and Z is positive downwards.
+ * Maximum distance in X axis: 298 mm.
+ * Maximum distance in Y axis: 369 mm.
+ * Maximum distance in Z axis: 53,2 mm (solder) or 64,41 mm (component).
+ * Boundary checks are only performed for Z axis because there is no endstop in
+ * its positive direction, only in the negative.
  * @param[in] x1: Initial position in mm, absolute.
  * @param[in] y1: Initial position in mm, absolute.
  * @param[in] z1: Initial position in mm, absolute.

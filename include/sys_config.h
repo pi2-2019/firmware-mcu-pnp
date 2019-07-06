@@ -184,7 +184,7 @@
  * (1/32 step) 106*62 ~ 6572 Hz (152,16 us)
  *
  * With SMCLK at 8 MHz and output mode 4 (toggle) 
- * set PWM period as 608*125ns*2 = 6,5789 ms
+ * set PWM period as 608*125ns*2 = 152 us
  */
 #define MIN_PULSE_PERIOD_ZDIR (608-1)
 
@@ -196,59 +196,39 @@
 
 /**
  * @brief Max RPM for C axis
- * Negligible load on the 0,22 kgf*cm motor. In order to work with
- * 0,1 kgf*cm in the best case scenario there will be a loss of 0,12 kgf*cm.
+ * Negligible load on the 0,22 kgf*cm motor.
  *
- * At 4 RPM:
- * (1/32 step) 106*4 ~ 424 Hz (2,358 ms)
+ * At 62 RPM:
+ * (1/32 step) 106*62 ~ 6572 Hz (152,16 us)
  *
  * With SMCLK at 8 MHz and output mode 4 (toggle) 
- * set PWM period as 9434*125ns*2 = 1,179 ms
+ * set PWM period as 608*125ns*2 = 152 us
  */
-#define MIN_PULSE_PERIOD_ROT (9434-1)
+#define MIN_PULSE_PERIOD_ROT (608-1)
 
 /**
  * @brief Max RPM for XYZ calibration routine
- * 10 RPM (see #MIN_PULSE_PERIOD_ZDIR)
+ * 10 RPM (see #MIN_PULSE_PERIOD_YDIR)
  */
-#define MIN_PULSE_CALIB_XYZ (MIN_PULSE_PERIOD_YDIR*2 - 1)
+#define MIN_PULSE_CALIB_XYZ (3774 - 1)
 
 /* Motors' steps per mm constants */
 
 /** @brief X axis steps per mm constant
- * GT-2 belt provides 5 mm per motor rotation. The system is configured to run
- * with 1/32 microstep, with 200 steps per rotation step motors, so:
- * 5 mm = 32*200 steps = 6400 steps 
- * 1 mm = 1280 steps
  */
 #define STEPS_PER_MM_X (324)
 /** @brief Y axis steps per mm constant
- * GT-2 belt provides 14 mm per motor rotation. The system is configured to run
- * with 1/32 microstep, with 200 steps per rotation step motors, so:
- * 14 mm = 32*200 steps = 6400 steps
- * 1 mm = 3200/7 steps ~ 457 steps
  */
-#define STEPS_PER_MM_Y (319)
+#define STEPS_PER_MM_Y (317)
 /** @brief Z axis steps per mm constant
- * Fuse provides 1,5 mm per motor rotation. The system is configured to run
- * with 1/32 microstep, with 200 steps per rotation step motors, so:
- * 1,5 mm = 32*200 steps = 6400 steps
- * 1 mm ~ 4267 steps
  */
 #define STEPS_PER_MM_Z (4267)
 /** @brief Solder extruder steps per mm constant
- * Fuse provides 1,5 mm per motor rotation. The system is configured to run
- * with 1/32 microstep, with 200 steps per rotation step motors, so:
- * 1,5 mm = 32*200 steps = 6400 steps
- * 1 mm ~ 4267 steps
  */
 #define STEPS_PER_MM_S (4267)
 /** @brief C axis (RZ) steps per mm constant
- * Motor completes 360 degrees in 200 steps, but system uses 1/32 microsteps.
- * 360° = 32*200 steps = 6400 steps
- * 1° = 160/9 steps ~ 18 steps
  */
-#define STEPS_PER_DEG_RZ (18)
+#define STEPS_PER_DEG_RZ (36)
 
 /* Global vars */
 /** Buffer to store raw data received by the UART */
