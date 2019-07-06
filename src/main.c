@@ -1,3 +1,9 @@
+/**
+ * @file
+ * @brief Runs configurations and polls tha main function.
+ * @author Davi Antônio da Silva Santos
+ */
+
 #include <msp430.h>
 
 #include "sys_config.h"

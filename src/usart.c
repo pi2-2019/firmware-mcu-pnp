@@ -1,3 +1,11 @@
+/**
+ * @file
+ * @brief Implements the globally available USART functions for configuring the
+ * peripherals, validating and transmiting data for all translation units which
+ * include this header.
+ * @author Davi Antônio da Silva Santos
+ */
+
 #include <msp430.h>
 #include <stdlib.h>
 #include <float.h>

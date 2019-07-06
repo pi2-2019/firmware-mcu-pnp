@@ -1,3 +1,9 @@
+/**
+ * @file
+ * @brief Implements the timer related routines
+ * @author Davi Antônio da Silva Santos
+ */
+
 #include <msp430.h>
 #include "sys_config.h"
 #include "timers.h"

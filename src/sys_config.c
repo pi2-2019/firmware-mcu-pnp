@@ -1,3 +1,10 @@
+/**
+ * @file
+ * @brief Implements the globally available macros, variables and routines.
+ * This includes the GPIO mappings and othe system configurations.
+ * @author Davi Antônio da Silva Santos
+ */
+
 #include <msp430.h>
 #include <string.h>
 #include "sys_config.h"
