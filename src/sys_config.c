@@ -64,9 +64,13 @@ void initial_setup(void)
 	P2OUT &= ~(DIR_RZ | DIR_S | DIR_Z);
 	
 	P2DIR |= ENABLE;
+	P2SEL &= ~ENABLE;
+	P2SEL2 &= ~ENABLE;
 	P2OUT |= ENABLE;
 	
 	P2DIR |= VACUUM;
+	P2SEL &= ~VACUUM;
+	P2SEL2 &= ~VACUUM;
 	P2OUT &= ~VACUUM;
 	
 	/* Reset the TX and RX buffers */
