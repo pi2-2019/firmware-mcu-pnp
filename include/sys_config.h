@@ -11,14 +11,11 @@
 #include <msp430.h>
 
 /* Endstop inputs */
-/** X+,Y+,Z+ endstop inputs (P1.0) */
-#define SW0 (BIT0)
+/** X- endstop input (P1.0) */
+#define SWX (BIT0)
 
-/** X-,Y-,Z- endstop inputs (P1.3) */
-#define SW1 (BIT3)
-
-/** All endstop inputs (P1.0 and P1.3) */
-#define ALLSW (SW0 | SW1)
+/** Y- endstop input (P1.3) */
+#define SWY (BIT3)
 
 /* UART */
 /** UCA0 RX pin (P1.1) */
@@ -58,9 +55,8 @@
 /** Solder piston direction (P2.4). */
 #define DIR_S (BIT4)
 
-/* Global enable output */
-/** Global driver enable (P2.6). Enables drivers when set to zero. */
-#define ENABLE (BIT6)
+/** Z- endstop input (P2.6) */
+#define SWZ (BIT6)
 
 /* Vacuum enable output */
 /** Vacuum enable (P2.7). Enables vacuum when one, disables when zero. */
@@ -114,13 +110,9 @@
 #define RESET_DIR_S (P2OUT &= ~DIR_S)
 #define TOGGLE_DIR_S (P2OUT ^= DIR_S)
 
+/* DIR Inputs for DRV8825 */
 #define CW (1)
 #define CCW (0)
-
-/* Helper macros for global enable output */
-#define SET_ENABLE (P2OUT |= ENABLE)
-#define RESET_ENABLE (P2OUT &= ~ENABLE)
-#define TOGGLE_ENABLE (P2OUT ^= ENABLE)
 
 /* Helper macros for vacuum enable output */
 #define SET_VACUUM (P2OUT |= VACUUM)
@@ -198,19 +190,19 @@
  * @brief Max RPM for C axis
  * Negligible load on the 0,22 kgf*cm motor.
  *
- * At 62 RPM:
- * (1/32 step) 106*62 ~ 6572 Hz (152,16 us)
+ * At 31 RPM:
+ * (1/32 step) 106*31 ~ 3286 Hz (304 us)
  *
  * With SMCLK at 8 MHz and output mode 4 (toggle) 
- * set PWM period as 608*125ns*2 = 152 us
+ * set PWM period as 1216*125ns*2 = 304 us
  */
-#define MIN_PULSE_PERIOD_ROT (608-1)
+#define MIN_PULSE_PERIOD_ROT (1216-1)
 
 /**
- * @brief Max RPM for XYZ calibration routine
- * 10 RPM (see #MIN_PULSE_PERIOD_YDIR)
+ * @brief Max RPM for XYZ calibration routine. Speed of the slowest motor.
+ * 20 RPM (see #MIN_PULSE_PERIOD_YDIR)
  */
-#define MIN_PULSE_CALIB_XYZ (3774 - 1)
+#define MIN_PULSE_CALIB_XYZ (MIN_PULSE_PERIOD_YDIR)
 
 /* Motors' steps per mm constants */
 
@@ -222,7 +214,7 @@
 #define STEPS_PER_MM_Y (317)
 /** @brief Z axis steps per mm constant
  */
-#define STEPS_PER_MM_Z (4267)
+#define STEPS_PER_MM_Z (1039)
 /** @brief Solder extruder steps per mm constant
  */
 #define STEPS_PER_MM_S (4267)

@@ -35,10 +35,10 @@ The microcontroller pinout is:
 ```
 Pin no.	Port no.	Function
 1			DVCC (3,3V)
-2	P1.0		SW0 (positive endstops INPUT)
+2	P1.0		SWX (X negative endstop INPUT with PULL-UP)
 3	P1.2		UCA0RXD
 4	P1.3		UCA0TXD
-5	P1.4		SW1 (negative endstops INPUT)
+5	P1.4		SWY (Y negative endstop INPUT with PULL-UP)
 6	P1.5		DIR_Y (Y axis stepper motors direction OUTPUT)
 7	P1.6		DIR_X (X axis stepper motor direction OUTPUT)
 8	P2.0		STEP_Y (Y axis stepper motors step OUTPUT)
@@ -48,7 +48,7 @@ Pin no.	Port no.	Function
 ```
 Pin no.		Port no.	Function
 20				DVSS (GND)
-19		P2.6		ENABLE (optional global driver enable OUTPUT)
+19		P2.6		SWZ (Z negative endstop INPUT with PULL-UP)
 18		P2.7		VACUUM (vacuum valve OUTPUT)
 17				TEST
 16				RST

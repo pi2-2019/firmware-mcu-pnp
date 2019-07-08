@@ -33,18 +33,30 @@ void initial_setup(void)
 	P1SEL2 |= UCA0TX;
 	
 	/*
-	 * P1.0, P1.3, are pull-up inputs for SW0 (X+,Y+,Z+) and SW1 (X-,Y-,Z-)
-	 * High logic level means end stop triggered
+	 * P1.0 is the pull-up input for X-
+	 * P1.3 is the pull-up input for Y-
+	 * P2.6 is the pull-up input for Z-
+	 * High logic level means endstops (X, Y, Z) triggered (untriggered
+	 * endstops must force low level).
 	 * Set rising edge interruption to watch end stop events
 	 * Clear interruption flag
 	 */
-	P1DIR &= ~ALLSW;
-	P1REN |= ALLSW;
-	P1OUT |= ALLSW;
-	P1IES &= ~ALLSW;
-	P1IE |= ALLSW;
+	P1DIR &= ~(SWX | SWY);
+	P1REN |= (SWX | SWY);
+	P1OUT |= (SWX | SWY);
+	P1IES &= ~(SWX | SWY);
+	P1IE |= (SWX | SWY);
 	P1IFG = 0;
-	
+
+	P2DIR &= ~SWZ;
+	P2SEL &= ~SWZ;
+	P2SEL2 &= ~SWZ;
+	P2REN |= SWZ;
+	P2OUT |= SWZ;
+	P2IES &= ~SWZ;
+	P2IE |= SWZ;
+	P2IFG = 0;
+
 	/*
 	 * Set the other pins as outputs
 	 * P2.0 (Y), P2.1 (X), P1.7 (S), P1.6 (RZ), P2.5 (Z) are the STEPS
@@ -52,10 +64,6 @@ void initial_setup(void)
 	 *
 	 * P1.4 (DIRY), P1.5 (DIRX), P2.2 (DIRZ), P2.4 (DIRSOLDER), P2.3 (DIRRZ)
 	 * are DIR outputs and will be initially set to zero.
-	 *
-	 * P2.6 is the optional global driver enable pin and will be set to one
-	 * in order to start the system with the drivers turned off (ENABLE'
-	 * pin).
 	 *
 	 * P2.7 controls the vacuum pump and will be set initially as zero
 	 * (vacuum on).
@@ -69,11 +77,6 @@ void initial_setup(void)
 	P1OUT &= ~(DIR_X | DIR_Y);
 	P2DIR |= (DIR_RZ | DIR_S | DIR_Z);
 	P2OUT &= ~(DIR_RZ | DIR_S | DIR_Z);
-	
-	P2DIR |= ENABLE;
-	P2SEL &= ~ENABLE;
-	P2SEL2 &= ~ENABLE;
-	P2OUT |= ENABLE;
 	
 	P2DIR |= VACUUM;
 	P2SEL &= ~VACUUM;

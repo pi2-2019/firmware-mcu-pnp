@@ -14,9 +14,6 @@
 
 void __attribute__ ((interrupt(USCIAB0RX_VECTOR))) received_data_ISR (void)
 {
-	/* deactivate interruptions */
-	//__bic_SR_register(GIE);
-
 	volatile char c;
 	/** Automatically initialized as zero */
 	static int i;
@@ -47,34 +44,38 @@ void __attribute__ ((interrupt(USCIAB0RX_VECTOR))) received_data_ISR (void)
 	} else {
 		i++;
 	}
-
-	/* activate interruptions */
-	//__bis_SR_register_on_exit(GIE);
 }
 
 void __attribute__ ((interrupt(PORT1_VECTOR))) port1_ISR (void)
 {
-	/* deactivate interruptions */
-	//__bic_SR_register(GIE);
-
 	/* Endstop sensor was triggered, kill the motors */
 	stop_t1_a3_c0();
 
-	curr_status.end_p_triggd = (P1IFG & SW0);
-	curr_status.end_n_triggd = (P1IFG & SW1);
+	curr_status.end_triggd = 1;
 
 	curr_status.calibrated = 0;
 	req_status.error = 1;
 	curr_status.error = 1;
 
-	if (curr_status.end_p_triggd)
-		send_string("\r\nEP H\r\n");
-
-	if (curr_status.end_n_triggd)
-		send_string("\r\nEN H\r\n");
+	if (curr_status.end_triggd)
+		send_string("\r\nE H\r\n");
 
 	P1IFG = 0;
+}
 
-	/* activate interruptions */
-	//__bis_SR_register_on_exit(GIE);
+void __attribute__ ((interrupt(PORT2_VECTOR))) port2_ISR (void)
+{
+	/* Endstop sensor was triggered, kill the motors */
+	stop_t1_a3_c0();
+
+	curr_status.end_triggd = 1;
+
+	curr_status.calibrated = 0;
+	req_status.error = 1;
+	curr_status.error = 1;
+
+	if (curr_status.end_triggd)
+		send_string("\r\nE H\r\n");
+
+	P2IFG = 0;
 }

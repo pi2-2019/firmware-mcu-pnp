@@ -15,10 +15,14 @@
 #include "sys_control.h"
 #include "timers.h"
 
-/** Maximum Z axis position in mm while in solder routine  53.2 mm*/
-const float max_z_solder = 12.7f;
+/** Maximum Z axis position in mm while in solder routine mm*/
+const float max_z_solder = 53.2f;
 /** Maximum Z axis position in mm while in regular routine 64.41 mm*/
-const float max_z_component = 16.0f;
+const float max_z_component = 64.41f;
+/** Maximum X axis position in mm */
+const float max_x = 298.0f;
+/** Maximum Y axis position in mm */
+const float max_y = 370.0f;
 
 void calibrate()
 {
@@ -31,65 +35,48 @@ void calibrate()
 	curr_status.calibrated = 0;
 	req_status.calibrated = 1;
 	req_status.error = 0;
-	curr_status.end_p_triggd = 0;
-	curr_status.end_n_triggd = 0;
+	curr_status.end_triggd = 0;
 	
 	/* Move X axis to X- */
 	RESET_DIR_X;
 	send_string("\r\nGoto X-\r\n");
 	
-	while((!curr_status.end_p_triggd) && (!curr_status.end_n_triggd)) {
+	while((!curr_status.end_triggd)) {
 		TOGGLE_STEPS_X;
 		__delay_cycles(MIN_PULSE_CALIB_XYZ);
 	}
-
-	if (!curr_status.end_n_triggd) {
-		send_string("\r\nError on X\r\n");
-		curr_status.calibrated = 0;
-		curr_status.error = 1;
-		return;
-	}
+	P1IE &= ~(SWX | SWY);
+	bresenham_3d(0, 0, 0, 5, 0, 0, MIN_PULSE_PERIOD_XDIR);
+	curr_status.end_triggd = 0;
 	send_string("\r\nX- OK\r\n");
-
-	curr_status.end_n_triggd = 0;
+	P1IE |= (SWX | SWY);
 	
 	/* Move Y axis to zero */
 	SET_DIR_Y;
 	send_string("\r\nGoto Y-\r\n");
 	
-	while((!curr_status.end_p_triggd) && (!curr_status.end_n_triggd)) {
+	while((!curr_status.end_triggd)) {
 		TOGGLE_STEPS_Y;
 		__delay_cycles(MIN_PULSE_CALIB_XYZ);
 	}
-
-	if (!curr_status.end_n_triggd) {
-		send_string("\r\nError on Y\r\n");
-		curr_status.calibrated = 0;
-		curr_status.error = 1;
-		return;
-	}
+	P1IE &= ~(SWX | SWY);
+	bresenham_3d(0, 0, 0, 0, 5, 0, MIN_PULSE_PERIOD_YDIR);
+	curr_status.end_triggd = 0;
 	send_string("\r\nY- OK\r\n");
-
-	curr_status.end_n_triggd = 0;
+	P1IE |= (SWX | SWY);
 	
 	/* Move Z axis to zero */
 	RESET_DIR_Z;
 	send_string("\r\nGoto Z-\r\n");
-	start_t1_a3_c0(MIN_PULSE_CALIB_XYZ);
-	while((!curr_status.end_p_triggd) && (!curr_status.end_n_triggd)) {
+	while((!curr_status.end_triggd)) {
 		TOGGLE_STEPS_Z;
 		__delay_cycles(MIN_PULSE_CALIB_XYZ);
 	}
-
-	if (!curr_status.end_n_triggd) {
-		send_string("\r\nError on Z\r\n");
-		curr_status.calibrated = 0;
-		curr_status.error = 1;
-		return;
-	}
+	P1IE &= ~SWZ;
+	bresenham_3d(0, 0, 0, 0, 0, 5, MIN_PULSE_PERIOD_ZDIR);
+	curr_status.end_triggd = 0;
 	send_string("\r\nZ- OK\r\n");
-
-	curr_status.end_n_triggd = 0;
+	P1IE |= SWZ;
 
 	curr_status.calibrated = 1;
 	curr_status.x = 0;
@@ -98,8 +85,7 @@ void calibrate()
 	req_status.x = 0;
 	req_status.y = 0;
 	req_status.z = 0;
-	curr_status.end_p_triggd = 0;
-	curr_status.end_n_triggd = 0;
+	curr_status.end_triggd = 0;
 	curr_status.error = 0;
 
 	send_string("\r\ndone\r\n");
@@ -191,14 +177,8 @@ void status()
 	else
 		send_string(no_str);
 	
-	send_string("EP ");
-	if(curr_status.end_p_triggd)
-		send_string(yes_str);
-	else
-		send_string(no_str);
-	
-	send_string("EN ");
-	if(curr_status.end_n_triggd)
+	send_string("END ");
+	if(curr_status.end_triggd)
 		send_string(yes_str);
 	else
 		send_string(no_str);
@@ -247,6 +227,20 @@ void eval_command()
 			
 			curr_status.zmax = max_z_solder;
 			curr_status.solder_routine = 1;
+		}
+
+		if (req_status.x >= max_x) {
+			send_string("XM ");
+			print_float(max_x);
+			send_string("\r\n");
+			req_status.x = max_x;
+		}
+
+		if (req_status.y >= max_y) {
+			send_string("YM ");
+			print_float(max_y);
+			send_string("\r\n");
+			req_status.y = max_y;
 		}
 
 		if (req_status.z >= req_status.zmax) {
