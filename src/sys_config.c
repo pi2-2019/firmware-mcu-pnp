@@ -90,10 +90,4 @@ void initial_setup(void)
 	/* Initialise the control vars */
 	memset(&req_status, 0, sizeof(struct status));
 	memset(&curr_status, 0, sizeof(struct status));
-	
-	/* Leave vacuum on */
-	/* The valve is normally open */
-	req_status.vacuum = 1;
-	RESET_VACUUM;
-	curr_status.vacuum = 1;
 }
