@@ -72,11 +72,11 @@ void calibrate()
 		TOGGLE_STEPS_Z;
 		__delay_cycles(MIN_PULSE_CALIB_XYZ);
 	}
-	P1IE &= ~SWZ;
+	P2IE &= ~SWZ;
 	bresenham_3d(0, 0, 0, 0, 0, 5, MIN_PULSE_PERIOD_ZDIR);
 	curr_status.end_triggd = 0;
 	send_string("Z- OK\n");
-	P1IE |= SWZ;
+	P2IE |= SWZ;
 
 	curr_status.calibrated = 1;
 	curr_status.x = 0;
@@ -281,14 +281,14 @@ void eval_command()
 		/* pulse the excitor coil? */
 		req_status.vacuum = 1;
 		/* Normally open valve */
-		RESET_VACUUM;
+		SET_VACUUM;
 		curr_status.vacuum = 1;
 		send_string("done\n");
 		break;
 	case 11: /* vacuum off */
 		req_status.vacuum = 0;
 		/* Normally open valve */
-		SET_VACUUM;
+		RESET_VACUUM;
 		curr_status.vacuum = 0;
 		send_string("done\n");
 		break;
@@ -345,6 +345,9 @@ void move_solder(float p1f, float p2f, unsigned int period)
 
 void move_rz(float p1f, float p2f, unsigned int period)
 {
+	P1IE &= ~(SWX | SWY);
+	P2IE &= ~SWZ;
+	
 	long int p1 = p1f*STEPS_PER_DEG_RZ;
 	long int p2 = p2f*STEPS_PER_DEG_RZ;
 
@@ -375,6 +378,9 @@ void move_rz(float p1f, float p2f, unsigned int period)
 	/* Update position */
 	curr_status.rz = 0;
 	req_status.rz = 0;
+	
+	P1IE |= (SWX | SWY);
+	P2IE |= SWZ;
 }
 
 void bresenham_3d(float x1f, float y1f, float z1f,
