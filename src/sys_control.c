@@ -39,7 +39,7 @@ void calibrate()
 	
 	/* Move X axis to X- */
 	RESET_DIR_X;
-	send_string("\r\nGoto X-\r\n");
+	send_string("Goto X-\n");
 	
 	while((!curr_status.end_triggd)) {
 		TOGGLE_STEPS_X;
@@ -48,12 +48,12 @@ void calibrate()
 	P1IE &= ~(SWX | SWY);
 	bresenham_3d(0, 0, 0, 5, 0, 0, MIN_PULSE_PERIOD_XDIR);
 	curr_status.end_triggd = 0;
-	send_string("\r\nX- OK\r\n");
+	send_string("X- OK\n");
 	P1IE |= (SWX | SWY);
 	
 	/* Move Y axis to zero */
 	SET_DIR_Y;
-	send_string("\r\nGoto Y-\r\n");
+	send_string("Goto Y-\n");
 	
 	while((!curr_status.end_triggd)) {
 		TOGGLE_STEPS_Y;
@@ -62,12 +62,12 @@ void calibrate()
 	P1IE &= ~(SWX | SWY);
 	bresenham_3d(0, 0, 0, 0, 5, 0, MIN_PULSE_PERIOD_YDIR);
 	curr_status.end_triggd = 0;
-	send_string("\r\nY- OK\r\n");
+	send_string("Y- OK\n");
 	P1IE |= (SWX | SWY);
 	
 	/* Move Z axis to zero */
 	RESET_DIR_Z;
-	send_string("\r\nGoto Z-\r\n");
+	send_string("Goto Z-\n");
 	while((!curr_status.end_triggd)) {
 		TOGGLE_STEPS_Z;
 		__delay_cycles(MIN_PULSE_CALIB_XYZ);
@@ -75,7 +75,7 @@ void calibrate()
 	P1IE &= ~SWZ;
 	bresenham_3d(0, 0, 0, 0, 0, 5, MIN_PULSE_PERIOD_ZDIR);
 	curr_status.end_triggd = 0;
-	send_string("\r\nZ- OK\r\n");
+	send_string("Z- OK\n");
 	P1IE |= SWZ;
 
 	curr_status.calibrated = 1;
@@ -88,7 +88,7 @@ void calibrate()
 	curr_status.end_triggd = 0;
 	curr_status.error = 0;
 
-	send_string("\r\ndone\r\n");
+	send_string("done\n");
 }
 
 void move()
@@ -118,36 +118,36 @@ void move()
 		move_solder(curr_status.solder, req_status.solder,
 				MIN_PULSE_PERIOD_SOLDER);
 				
-		send_string("\r\ndone\r\n");
+		send_string("done\n");
 	} else {
-		send_string("\r\nRECAL\r\n");
-		send_string("\r\ndone\r\n");
+		send_string("RECAL\n");
+		send_string("done\n");
 	}
 }
 
 void status()
 {
-	char yes_str[] = "Y\r\n";
-	char no_str[] = "N\r\n";
+	char yes_str[] = "Y\n";
+	char no_str[] = "N\n";
 	
-	send_string("\r\n");
-	send_string("mm abs\r\n");
+	send_char('\n');
+	send_string("mm abs\n");
 	
 	send_string("X ");
 	print_float(curr_status.x);
-	send_string("\r\n");
+	send_char('\n');
 	
 	send_string("Y ");
 	print_float(curr_status.y);
-	send_string("\r\n");
+	send_char('\n');
 	
 	send_string("Z ");
 	print_float(curr_status.z);
-	send_string("\r\n");
+	send_char('\n');
 	
 	send_string("E ");
 	print_float(curr_status.solder);
-	send_string("\r\n");
+	send_char('\n');
 	
 	send_string("SDR ");
 	if (curr_status.solder_routine)
@@ -157,7 +157,7 @@ void status()
 	
 	send_string("ZM ");
 	print_float(curr_status.zmax);
-	send_string("\r\n");
+	send_char('\n');
 	
 	send_string("VAC ");
 	if (curr_status.vacuum)
@@ -183,7 +183,7 @@ void status()
 	else
 		send_string(no_str);
 	
-	send_string("done\r\n");
+	send_string("done\n");
 }
 
 void eval_command()
@@ -232,21 +232,21 @@ void eval_command()
 		if (req_status.x >= max_x) {
 			send_string("XM ");
 			print_float(max_x);
-			send_string("\r\n");
+			send_char('\n');
 			req_status.x = max_x;
 		}
 
 		if (req_status.y >= max_y) {
 			send_string("YM ");
 			print_float(max_y);
-			send_string("\r\n");
+			send_char('\n');
 			req_status.y = max_y;
 		}
 
 		if (req_status.z >= req_status.zmax) {
 			send_string("ZM ");
 			print_float(curr_status.zmax);
-			send_string("\r\n");
+			send_char('\n');
 			req_status.z = curr_status.zmax;
 		}
 
@@ -265,7 +265,7 @@ void eval_command()
 		curr_status.rz = parse_param('C', curr_status.rz);
 		curr_status.solder = parse_param('E', curr_status.solder);
 		curr_status.error = 0;
-		send_string("done\r\n");
+		send_string("done\n");
 		break;
 	default:
 		uknown_gc = 1;
@@ -283,14 +283,14 @@ void eval_command()
 		/* Normally open valve */
 		RESET_VACUUM;
 		curr_status.vacuum = 1;
-		send_string("done\r\n");
+		send_string("done\n");
 		break;
 	case 11: /* vacuum off */
 		req_status.vacuum = 0;
 		/* Normally open valve */
 		SET_VACUUM;
 		curr_status.vacuum = 0;
-		send_string("done\r\n");
+		send_string("done\n");
 		break;
 	case 114:
 		status();
@@ -301,8 +301,8 @@ void eval_command()
 	}
 	
 	if (uknown_gc && uknown_mc) {
-		send_string("\r\nG/M-Code?\r\n");
-		send_string("done\r\n");
+		send_string("G/M-Code?\n");
+		send_string("done\n");
 	}
 	
 	memset(rx_data_raw, 0, RX_STR_SIZE);	

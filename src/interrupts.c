@@ -58,7 +58,7 @@ void __attribute__ ((interrupt(PORT1_VECTOR))) port1_ISR (void)
 	curr_status.error = 1;
 
 	if (curr_status.end_triggd)
-		send_string("\r\nE H\r\n");
+		send_string("E H\n");
 
 	P1IFG = 0;
 }
@@ -75,7 +75,7 @@ void __attribute__ ((interrupt(PORT2_VECTOR))) port2_ISR (void)
 	curr_status.error = 1;
 
 	if (curr_status.end_triggd)
-		send_string("\r\nE H\r\n");
+		send_string("E H\n");
 
 	P2IFG = 0;
 }
