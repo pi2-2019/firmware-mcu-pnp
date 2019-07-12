@@ -2,7 +2,8 @@
 
 This firmware was projected to control a PNP machine through G/M-codes.
 The microcontroller used is the MSP430G2553, found in the LaunchPad G2
-development boards.
+development boards. This build was tested with `MSP430-GCC 6_1_1_0` based on
+GCC 7.3.2.154 from Texas Instruments website. 
 
 This PNP has six stepper motors:
 * two on the Y axis, one connected with reverse phases;
@@ -15,14 +16,17 @@ Only the Y axis motors share the same DIR and STEP inputs.
 
 The vacuum valve is also controlled by the MCU and is normally open.
 
-## Build instructions [TODO]
-1. Install `slac640y` from Texas Instruments website
-2. Apply dlbeer patches onto `slac640y`
-3. Install `MSPDebug`
-4. Install `MSP430-GCC` from Texas Instruments website
-5. Configure the compiler and libraries location in the `Makefile`
+## Build instructions
+1. Install `MSPDebug` and `slac640y`
+[https://dlbeer.co.nz/articles/slac460y/index.html]
+2. Install `MSP430-GCC` from Texas Instruments website
+[http://software-dl.ti.com/msp430/msp430_public_sw/mcu/msp430/MSPGCC/latest/index_FDS.html]
+3. Configure the compiler and libraries location in the `Makefile`
 
 ## Makefile recipes
+Update the `CC` and `CPPFLAGS` to match the your development environment.
+The Makefile was configured to generate a program optimised for size and will
+emit warnings for common mistakes.
 * `make devredo` will clear the screen, execute `make clean` and compile
 and link the source files and libraries. A map file will be generated after the
 linking process.
@@ -60,10 +64,10 @@ Pin no.		Port no.	Function
 ```
 
 ## Supported G/M-codes
-All the G/M-codes supported use only absolute coordinates in millimiters with a
+All the G/M-codes supported use only absolute coordinates in millimetres with a
 precision of six decimal places. Exponential notation is not supported.
 
-The feedrate is defined internally and is not modifieble via any code.
+The feedrate is defined internally and is not modifiable via any code.
 
 The command will be executed if the sent string reaches 64 characters or if an
 ASCII null byte (`\0`), `*`, `(`, or `;` is sent.
@@ -75,11 +79,11 @@ correctly.
 * `G0 Xnnnnn.nnnnnn Ynnnnn.nnnnnn Znnnnn.nnnnnn Cnnnnn.nnnnnn Ennnnn.nnnnnn` or
 `G1 Xnnnnn.nnnnnn Ynnnnn.nnnnnn Znnnnn.nnnnnn Cnnnnn.nnnnnn Ennnnn.nnnnnn` will
 move the motors in a linear fashion. If the machine is in an error status
-(error flah is set), it will refuse to move unless an automatic or manual
+(error flag is set), it will refuse to move unless an automatic or manual
 calibration is performed. The user does not need to send all the positions at
 once.
 
-* `G33` will start the auto calibration routine. If the routine is successfull
+* `G33` will start the auto calibration routine. If the routine is successful
 the machine will clear the error flag and set an auto calibration flag. The
 error flag will be set if any unexpected condition is detected in the routine.
 
