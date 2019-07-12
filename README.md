@@ -1,9 +1,9 @@
-# PNP Controller Firmware
+# PNP Controller Firmware and Example PCB
 
 This firmware was projected to control a PNP machine through G/M-codes.
 The microcontroller used is the MSP430G2553, found in the LaunchPad G2
 development boards. This build was tested with `MSP430-GCC 6_1_1_0` based on
-GCC 7.3.2.154 from Texas Instruments website. 
+GCC 7.3.2.154 from Texas Instruments website.
 
 This PNP has six stepper motors:
 * two on the Y axis, one connected with reverse phases;
@@ -14,14 +14,17 @@ This PNP has six stepper motors:
 
 Only the Y axis motors share the same DIR and STEP inputs.
 
-The vacuum valve is also controlled by the MCU and is normally open.
+The vacuum valve is also controlled by the MCU (Microcontroller Unit) using an
+phototransistor optocoupler.
 
-## Build instructions
+## Firmware build instructions
 1. Install `MSPDebug` and `slac640y`
-[https://dlbeer.co.nz/articles/slac460y/index.html]
+<https://dlbeer.co.nz/articles/slac460y/index.html>
 2. Install `MSP430-GCC` from Texas Instruments website
-[http://software-dl.ti.com/msp430/msp430_public_sw/mcu/msp430/MSPGCC/latest/index_FDS.html]
+<http://software-dl.ti.com/msp430/msp430_public_sw/mcu/msp430/MSPGCC/latest/index_FDS.html>
 3. Configure the compiler and libraries location in the `Makefile`
+4. Run a `make` recipe
+5. Program MSP with `mspdebug`.
 
 ## Makefile recipes
 Update the `CC` and `CPPFLAGS` to match the your development environment.
@@ -34,11 +37,11 @@ linking process.
 * `make clean` will clear the outputs (`*.o` and `*.elf`).
 * `make` will compile and link if necessary.
 
-## System pinout
+## Microcontroller pinout
 The microcontroller pinout is:
 ```
 Pin no.	Port no.	Function
-1			DVCC (3,3V)
+1			DVCC (3,3 V)
 2	P1.0		SWX (X negative endstop INPUT with PULL-UP)
 3	P1.2		UCA0RXD
 4	P1.3		UCA0TXD
@@ -75,24 +78,32 @@ ASCII null byte (`\0`), `*`, `(`, or `;` is sent.
 The machine will issue the string "done" after each command is performed
 correctly.
 
-### G-codes
+### Supported G-codes
 * `G0 Xnnnnn.nnnnnn Ynnnnn.nnnnnn Znnnnn.nnnnnn Cnnnnn.nnnnnn Ennnnn.nnnnnn` or
 `G1 Xnnnnn.nnnnnn Ynnnnn.nnnnnn Znnnnn.nnnnnn Cnnnnn.nnnnnn Ennnnn.nnnnnn` will
 move the motors in a linear fashion. If the machine is in an error status
 (error flag is set), it will refuse to move unless an automatic or manual
 calibration is performed. The user does not need to send all the positions at
-once.
+once.  
+The movement is performed first in the X, Y and Z axis using Bresenham's line
+algorithm. After these axis have reached their desires position, the C axis is
+moved, performing a Z axis rotation and, at last, the extruder motor is moved to
+the specified position.  
+If any endstop is triggered during X, Y, and Z axis movement, the machine will
+halt and must be reset.
 
 * `G33` will start the auto calibration routine. If the routine is successful
 the machine will clear the error flag and set an auto calibration flag. The
-error flag will be set if any unexpected condition is detected in the routine.
+error flag will be set if any unexpected condition is detected in the routine.  
+The calibration routine will move X, Y and Z axis to their origins in this
+order.
 
 * `G92 Xnnnnn.nnnnnn Ynnnnn.nnnnnn Znnnnn.nnnnnn Cnnnnn.nnnnnn Ennnnn.nnnnnn`
 will set the current position. Useful for manual calibration. The error
 flag is always cleared if this command is executed, so it must be used with
 caution. The positions do not need to be sent at once.
 
-### M-codes
+### Supported M-codes
 * `M10` will turn the vacuum on.
 
 * `M11` will turn the vacuum off.
